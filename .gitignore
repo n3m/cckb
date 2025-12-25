@@ -1,2 +1,11 @@
 .quibbler
 .claude
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# OS files
+.DS_Store

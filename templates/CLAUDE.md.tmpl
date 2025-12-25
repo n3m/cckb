@@ -1,0 +1,29 @@
+
+## Project Knowledge Base (CCKB)
+
+This project uses Claude Code Knowledge Base for persistent project context.
+
+### Vault Location
+`cc-knowledge-base/vault/`
+
+### Usage Guidelines
+
+1. **Before creating new entities/services:**
+   - Check vault INDEX.md for existing patterns
+   - Review related entity structures in `/vault/entities/`
+   - Follow established architecture in `/vault/architecture.md`
+
+2. **When uncertain about project conventions:**
+   - Consult `/vault/general-knowledge.md`
+   - Check entity-specific INDEX.md files
+   - Ask user if not found in vault
+
+3. **Sparse Loading:**
+   - Start with INDEX.md files only
+   - Deep-load specific files only when needed
+   - Never load entire vault at once
+
+4. **Context from hooks:**
+   - CCKB hooks will automatically inject relevant context
+   - Trust injected context for immediate decisions
+   - Verify with vault files for complex decisions

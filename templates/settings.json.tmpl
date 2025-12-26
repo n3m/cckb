@@ -2,14 +2,24 @@
   "hooks": {
     "SessionStart": [
       {
-        "type": "command",
-        "command": "npx cckb hook session-start"
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx cckb hook session-start"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
       {
-        "type": "command",
-        "command": "npx cckb hook user-prompt"
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx cckb hook user-prompt"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -25,8 +35,13 @@
     ],
     "Stop": [
       {
-        "type": "command",
-        "command": "npx cckb hook stop"
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx cckb hook stop"
+          }
+        ]
       }
     ],
     "PreToolUse": [

@@ -20,6 +20,13 @@ export interface CCKBConfig {
     enabled: boolean;
     contextDepth: number;
   };
+  discover: {
+    maxFiles: number;
+    maxChunkSize: number;
+    excludePatterns: string[];
+    priorityPatterns: string[];
+    supportedLanguages: string[];
+  };
 }
 
 export const DEFAULT_CONFIG: CCKBConfig = {
@@ -40,6 +47,28 @@ export const DEFAULT_CONFIG: CCKBConfig = {
   feedback: {
     enabled: true,
     contextDepth: 2,
+  },
+  discover: {
+    maxFiles: 100,
+    maxChunkSize: 50000,
+    excludePatterns: [
+      "*.min.js",
+      "*.bundle.js",
+      "*.map",
+      "coverage/**",
+      ".next/**",
+      "build/**",
+      "dist/**",
+    ],
+    priorityPatterns: [
+      "**/index.{ts,js,tsx,jsx}",
+      "**/main.{ts,js,py,go,rs}",
+      "**/app.{ts,js,py}",
+      "**/models/**",
+      "**/entities/**",
+      "**/services/**",
+    ],
+    supportedLanguages: ["typescript", "javascript", "python", "go", "rust"],
   },
 };
 

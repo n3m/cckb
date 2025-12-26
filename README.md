@@ -62,6 +62,9 @@ CCKB runs silently in the background, capturing conversations and building a str
 ```bash
 # From your project directory
 npx cckb init
+
+# Install and analyze existing codebase
+npx cckb init --discover
 ```
 
 ### Option 2: Global Install
@@ -77,6 +80,24 @@ cckb init
 ```bash
 pnpm dlx cckb init
 ```
+
+### Bootstrapping Existing Projects
+
+For existing codebases, use the `discover` command to analyze and populate the vault:
+
+```bash
+# After init, or anytime
+cckb discover
+
+# Or during install
+cckb init --discover
+```
+
+The discover command uses Claude to analyze your codebase and automatically populate the vault with:
+- **Entities** — Data models, types, interfaces
+- **Architecture** — Design patterns, structural decisions
+- **Services** — Controllers, handlers, business logic
+- **Knowledge** — Conventions, configuration, project context
 
 ---
 
@@ -109,7 +130,8 @@ Edit `cc-knowledge-base/.cckb-config.json`:
 {
   "compaction": {
     "trigger": "session_end",
-    "sizeThresholdKB": 50
+    "sizeThresholdKB": 50,
+    "cleanupAfterSummary": "keep"
   },
   "capture": {
     "tools": ["Write", "Edit", "MultiEdit", "Bash", "Task"],
@@ -122,6 +144,11 @@ Edit `cc-knowledge-base/.cckb-config.json`:
   "feedback": {
     "enabled": true,
     "contextDepth": 2
+  },
+  "discover": {
+    "maxFiles": 100,
+    "maxChunkSize": 50000,
+    "supportedLanguages": ["typescript", "javascript", "python", "go", "rust"]
   }
 }
 ```
@@ -130,12 +157,16 @@ Edit `cc-knowledge-base/.cckb-config.json`:
 |--------|-------------|
 | `compaction.trigger` | When to summarize: `session_end`, `size`, `messages`, or `manual` |
 | `compaction.sizeThresholdKB` | File size threshold for rotation |
+| `compaction.cleanupAfterSummary` | After compaction: `keep`, `archive`, or `delete` original files |
 | `capture.tools` | Which tool outputs to capture |
 | `capture.maxContentLength` | Max characters per tool output |
 | `vault.autoIntegrate` | Auto-update vault after compaction |
 | `vault.maxDepth` | Maximum folder nesting depth |
 | `feedback.enabled` | Inject vault context into sessions |
 | `feedback.contextDepth` | How many INDEX levels to load |
+| `discover.maxFiles` | Maximum files to analyze |
+| `discover.maxChunkSize` | Characters per Claude analysis chunk |
+| `discover.supportedLanguages` | Languages to analyze |
 
 ---
 
@@ -189,11 +220,14 @@ All hooks run silently in the background.
 ## Commands
 
 ```bash
-cckb init [path]     # Install CCKB in a project
-cckb init --force    # Reinstall, overwriting existing config
-cckb hook <name>     # Run a hook (internal use)
-cckb version         # Show version
-cckb help            # Show help
+cckb init [path]           # Install CCKB in a project
+cckb init --force          # Reinstall, overwriting existing config
+cckb init --discover       # Install and analyze existing codebase
+cckb discover [path]       # Analyze codebase and populate vault
+cckb discover --verbose    # Show detailed progress
+cckb hook <name>           # Run a hook (internal use)
+cckb version               # Show version
+cckb help                  # Show help
 ```
 
 ---

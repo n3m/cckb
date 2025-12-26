@@ -1,7 +1,11 @@
 export { install } from "./cli/install.js";
+export { discover } from "./cli/discover.js";
 export { ConversationManager } from "./core/conversation-manager.js";
 export { CompactionEngine } from "./core/compaction-engine.js";
 export { VaultIntegrator } from "./core/vault-integrator.js";
 export { EntityDetector } from "./core/entity-detector.js";
 export { IndexManager } from "./core/index-manager.js";
+export { AutoDiscover } from "./core/auto-discover.js";
+export { FileCollector } from "./core/file-collector.js";
+export { ChunkManager } from "./core/chunk-manager.js";
 export type { CCKBConfig } from "./utils/config.js";

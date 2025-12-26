@@ -63,7 +63,9 @@ cckb/
 ├── src/
 │   ├── index.ts                 # Main exports
 │   ├── bin/cckb.ts              # CLI entry point (cckb command)
-│   ├── cli/install.ts           # npm installer logic
+│   ├── cli/
+│   │   ├── install.ts           # npm installer logic
+│   │   └── discover.ts          # Discover command handler
 │   ├── hooks/                   # Claude Code hook handlers
 │   │   ├── session-start.ts     # Creates conversation folder
 │   │   ├── user-prompt.ts       # Captures user input
@@ -75,7 +77,10 @@ cckb/
 │   │   ├── compaction-engine.ts     # Summarization via Claude SDK
 │   │   ├── vault-integrator.ts      # Updates vault from summaries
 │   │   ├── entity-detector.ts       # Parses summaries into typed items
-│   │   └── index-manager.ts         # INDEX.md management
+│   │   ├── index-manager.ts         # INDEX.md management
+│   │   ├── auto-discover.ts         # Codebase analysis orchestrator
+│   │   ├── file-collector.ts        # File discovery and prioritization
+│   │   └── chunk-manager.ts         # File batching for Claude analysis
 │   └── utils/
 │       ├── config.ts            # Configuration and path helpers
 │       ├── file-utils.ts        # File system utilities
@@ -216,6 +221,28 @@ Classifies extracted items:
 - Provides sparse loading (only load what's needed)
 - Maintains links between folders
 
+### AutoDiscover (auto-discover.ts)
+
+Orchestrates codebase analysis for existing projects:
+- Uses FileCollector to discover and prioritize source files
+- Uses ChunkManager to batch files for Claude analysis
+- Calls Claude SDK for intelligent code analysis
+- Produces Summary objects fed to VaultIntegrator
+- Supports multi-language: TypeScript, JavaScript, Python, Go, Rust
+
+### FileCollector (file-collector.ts)
+
+- Detects project type from manifests (package.json, Cargo.toml, go.mod, etc.)
+- Respects .gitignore patterns
+- Categorizes files: entry, model, service, util, config, test
+- Calculates priority scores for analysis ordering
+
+### ChunkManager (chunk-manager.ts)
+
+- Batches files by size for Claude context limits
+- Tracks estimated token counts
+- High-priority files in earlier chunks
+
 ## Configuration
 
 User config at `cc-knowledge-base/.cckb-config.json`:
@@ -239,6 +266,11 @@ User config at `cc-knowledge-base/.cckb-config.json`:
   "feedback": {
     "enabled": true,
     "contextDepth": 2
+  },
+  "discover": {
+    "maxFiles": 100,              // Max files to analyze
+    "maxChunkSize": 50000,        // Chars per Claude call
+    "supportedLanguages": ["typescript", "javascript", "python", "go", "rust"]
   }
 }
 ```

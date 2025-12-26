@@ -181,7 +181,7 @@ create_config_file() {
   },
   "discover": {
     "maxFiles": 100,
-    "maxChunkSize": 50000,
+    "maxChunkSize": 30000,
     "excludePatterns": ["*.min.js", "*.bundle.js", "*.map", "coverage/**", ".next/**", "build/**", "dist/**"],
     "priorityPatterns": ["**/index.{ts,js,tsx,jsx}", "**/main.{ts,js,py,go,rs}", "**/app.{ts,js,py}", "**/models/**", "**/entities/**", "**/services/**"],
     "supportedLanguages": ["typescript", "javascript", "python", "go", "rust"]

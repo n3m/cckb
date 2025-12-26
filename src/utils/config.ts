@@ -50,7 +50,7 @@ export const DEFAULT_CONFIG: CCKBConfig = {
   },
   discover: {
     maxFiles: 100,
-    maxChunkSize: 50000,
+    maxChunkSize: 30000,  // ~7500 tokens, safer for Claude
     excludePatterns: [
       "*.min.js",
       "*.bundle.js",

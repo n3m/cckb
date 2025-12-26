@@ -119,7 +119,8 @@ export class AutoDiscover {
     let chunksProcessed = 0;
 
     for (const chunk of chunks) {
-      this.log(`  [${chunk.index + 1}/${chunk.totalChunks}] Analyzing ${chunk.files.length} files...`);
+      const chunkKB = Math.round(chunk.content.length / 1024);
+      this.log(`  [${chunk.index + 1}/${chunk.totalChunks}] Analyzing ${chunk.files.length} files (~${chunkKB}KB, ~${chunk.estimatedTokens} tokens)...`);
 
       try {
         const summary = await this.analyzeChunk(chunk, collection);
@@ -184,10 +185,12 @@ export class AutoDiscover {
       .replace("{fileContents}", chunk.content);
 
     const response = await this.runWithProgressIndicators(
-      () => spawnClaudeAgent(prompt, { timeout: 300000 }), // 5 minutes
+      () => spawnClaudeAgent(prompt, { timeout: 600000 }), // 10 minutes
       [
         { at: 60000, message: "      Still analyzing... (1 min)" },
         { at: 180000, message: "      Still working... (3 min)" },
+        { at: 300000, message: "      Still working... (5 min)" },
+        { at: 480000, message: "      Almost timing out... (8 min)" },
       ]
     );
 

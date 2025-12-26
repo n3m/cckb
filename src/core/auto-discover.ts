@@ -183,9 +183,40 @@ export class AutoDiscover {
       .replace("{projectType}", collection.projectType)
       .replace("{fileContents}", chunk.content);
 
-    const response = await spawnClaudeAgent(prompt);
+    const response = await this.runWithProgressIndicators(
+      () => spawnClaudeAgent(prompt, { timeout: 300000 }), // 5 minutes
+      [
+        { at: 60000, message: "      Still analyzing... (1 min)" },
+        { at: 180000, message: "      Still working... (3 min)" },
+      ]
+    );
 
     return this.parseResponse(response, chunk);
+  }
+
+  private async runWithProgressIndicators<T>(
+    task: () => Promise<T>,
+    indicators: { at: number; message: string }[]
+  ): Promise<T> {
+    const timers: NodeJS.Timeout[] = [];
+
+    // Set up progress indicators
+    for (const indicator of indicators) {
+      const timer = setTimeout(() => {
+        this.log(indicator.message);
+      }, indicator.at);
+      timers.push(timer);
+    }
+
+    try {
+      const result = await task();
+      return result;
+    } finally {
+      // Clean up timers
+      for (const timer of timers) {
+        clearTimeout(timer);
+      }
+    }
   }
 
   private parseResponse(response: string, _chunk: FileChunk): Summary {

@@ -104,6 +104,8 @@ async function createDirectoryStructure(targetPath: string): Promise<void> {
     "cc-knowledge-base/conversations",
     "cc-knowledge-base/vault",
     "cc-knowledge-base/vault/entities",
+    "cc-knowledge-base/vault/apps",
+    "cc-knowledge-base/vault/modules",
     "cc-knowledge-base/.cckb-state",
   ];
 
@@ -128,6 +130,14 @@ async function copyTemplateFiles(targetPath: string): Promise<void> {
     {
       src: "vault/entities/INDEX.md",
       dest: "cc-knowledge-base/vault/entities/INDEX.md",
+    },
+    {
+      src: "vault/apps/INDEX.md",
+      dest: "cc-knowledge-base/vault/apps/INDEX.md",
+    },
+    {
+      src: "vault/modules/INDEX.md",
+      dest: "cc-knowledge-base/vault/modules/INDEX.md",
     },
   ];
 

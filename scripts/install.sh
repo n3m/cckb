@@ -131,6 +131,8 @@ create_directory_structure() {
 
     mkdir -p "$PROJECT_DIR/cc-knowledge-base/conversations"
     mkdir -p "$PROJECT_DIR/cc-knowledge-base/vault/entities"
+    mkdir -p "$PROJECT_DIR/cc-knowledge-base/vault/apps"
+    mkdir -p "$PROJECT_DIR/cc-knowledge-base/vault/modules"
     mkdir -p "$PROJECT_DIR/cc-knowledge-base/.cckb-state"
 
     # Create .gitkeep for conversations
@@ -148,6 +150,8 @@ copy_vault_templates() {
     cp "$templates_dir/architecture.md" "$PROJECT_DIR/cc-knowledge-base/vault/"
     cp "$templates_dir/general-knowledge.md" "$PROJECT_DIR/cc-knowledge-base/vault/"
     cp "$templates_dir/entities/INDEX.md" "$PROJECT_DIR/cc-knowledge-base/vault/entities/"
+    cp "$templates_dir/apps/INDEX.md" "$PROJECT_DIR/cc-knowledge-base/vault/apps/"
+    cp "$templates_dir/modules/INDEX.md" "$PROJECT_DIR/cc-knowledge-base/vault/modules/"
 
     print_success "Copied vault templates"
 }

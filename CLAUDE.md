@@ -225,7 +225,8 @@ User config at `cc-knowledge-base/.cckb-config.json`:
   "compaction": {
     "trigger": "session_end",    // session_end | size | messages | manual
     "sizeThresholdKB": 50,
-    "messageThreshold": 100
+    "messageThreshold": 100,
+    "cleanupAfterSummary": "keep" // keep | archive | delete
   },
   "capture": {
     "tools": ["Write", "Edit", "MultiEdit", "Bash", "Task"],
@@ -241,6 +242,13 @@ User config at `cc-knowledge-base/.cckb-config.json`:
   }
 }
 ```
+
+### Cleanup Options
+
+After compaction generates `summary.md`, original conversation files can be:
+- **`keep`** (default): Preserve all files for audit trail and re-processing
+- **`archive`**: Compress to `raw.txt.gz` then delete originals
+- **`delete`**: Remove originals immediately (summary.md remains)
 
 ## Key Implementation Details
 

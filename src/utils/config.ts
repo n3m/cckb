@@ -6,6 +6,7 @@ export interface CCKBConfig {
     trigger: "session_end" | "size" | "messages" | "manual";
     sizeThresholdKB: number;
     messageThreshold: number;
+    cleanupAfterSummary: "keep" | "archive" | "delete";
   };
   capture: {
     tools: string[];
@@ -26,6 +27,7 @@ export const DEFAULT_CONFIG: CCKBConfig = {
     trigger: "session_end",
     sizeThresholdKB: 50,
     messageThreshold: 100,
+    cleanupAfterSummary: "keep",
   },
   capture: {
     tools: ["Write", "Edit", "MultiEdit", "Bash", "Task"],

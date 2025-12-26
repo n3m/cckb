@@ -1,7 +1,12 @@
 import * as path from "node:path";
-import { writeTextFile } from "../utils/file-utils.js";
-import { getConversationsPath } from "../utils/config.js";
+import * as fs from "node:fs/promises";
+import * as zlib from "node:zlib";
+import { promisify } from "node:util";
+import { writeTextFile, readTextFile } from "../utils/file-utils.js";
+import { getConversationsPath, loadConfig } from "../utils/config.js";
 import { spawnClaudeAgent } from "../utils/claude-sdk.js";
+
+const gzip = promisify(zlib.gzip);
 
 const SUMMARIZATION_PROMPT = `You are a technical knowledge extractor. Analyze this conversation log and extract key information for a project knowledge base.
 
@@ -93,6 +98,9 @@ export class CompactionEngine {
 
       // Write summary to conversation folder
       await this.writeSummary(sessionId, summaryContent);
+
+      // Cleanup original conversation files based on config
+      await this.cleanupConversationFiles(sessionId);
 
       return summary;
     } catch (error) {
@@ -294,5 +302,77 @@ ${content}
 `;
 
     await writeTextFile(summaryPath, fullContent);
+  }
+
+  private async cleanupConversationFiles(sessionId: string): Promise<void> {
+    const config = await loadConfig(this.projectPath);
+    const cleanupMode = config.compaction.cleanupAfterSummary;
+
+    if (cleanupMode === "keep") {
+      return; // Nothing to do
+    }
+
+    const conversationsPath = getConversationsPath(this.projectPath);
+    const sessionPath = path.join(conversationsPath, sessionId);
+
+    // Get all conversation files (numbered .txt files)
+    const files = await fs.readdir(sessionPath);
+    const conversationFiles = files.filter(
+      (f) => /^\d+\.txt$/.test(f)
+    );
+
+    if (conversationFiles.length === 0) {
+      return;
+    }
+
+    if (cleanupMode === "archive") {
+      await this.archiveConversationFiles(sessionPath, conversationFiles);
+    } else if (cleanupMode === "delete") {
+      await this.deleteConversationFiles(sessionPath, conversationFiles);
+    }
+  }
+
+  private async archiveConversationFiles(
+    sessionPath: string,
+    files: string[]
+  ): Promise<void> {
+    try {
+      // Combine all conversation files into one archive
+      const contents: string[] = [];
+
+      for (const file of files.sort()) {
+        const filePath = path.join(sessionPath, file);
+        const content = await readTextFile(filePath);
+        if (content) {
+          contents.push(`=== ${file} ===\n${content}`);
+        }
+      }
+
+      const combined = contents.join("\n\n");
+      const compressed = await gzip(Buffer.from(combined, "utf-8"));
+
+      // Write archive
+      const archivePath = path.join(sessionPath, "raw.txt.gz");
+      await fs.writeFile(archivePath, compressed);
+
+      // Delete original files
+      await this.deleteConversationFiles(sessionPath, files);
+    } catch (error) {
+      console.error("Failed to archive conversation files:", error);
+      // Don't delete originals if archive fails
+    }
+  }
+
+  private async deleteConversationFiles(
+    sessionPath: string,
+    files: string[]
+  ): Promise<void> {
+    for (const file of files) {
+      try {
+        await fs.unlink(path.join(sessionPath, file));
+      } catch {
+        // Ignore deletion errors
+      }
+    }
   }
 }

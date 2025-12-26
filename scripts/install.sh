@@ -164,7 +164,8 @@ create_config_file() {
   "compaction": {
     "trigger": "session_end",
     "sizeThresholdKB": 50,
-    "messageThreshold": 100
+    "messageThreshold": 100,
+    "cleanupAfterSummary": "keep"
   },
   "capture": {
     "tools": ["Write", "Edit", "MultiEdit", "Bash", "Task"],

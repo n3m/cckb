@@ -131,7 +131,8 @@ export class AutoDiscover {
           await this.delay(1500);
         }
       } catch (error) {
-        this.log(`    Warning: Chunk ${chunk.index + 1} analysis failed`);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        this.log(`    Warning: Chunk ${chunk.index + 1} analysis failed: ${errorMsg}`);
         // Continue with other chunks
       }
     }

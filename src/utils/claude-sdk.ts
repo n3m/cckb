@@ -1,19 +1,35 @@
 import { spawn } from "node:child_process";
 
+export interface ClaudeAgentOptions {
+  timeout?: number; // milliseconds, default 5 minutes
+}
+
 /**
  * Spawns a Claude Code subagent to process a prompt.
  * Uses the Claude Code CLI with the --print flag to get output.
  */
-export async function spawnClaudeAgent(prompt: string): Promise<string> {
+export async function spawnClaudeAgent(
+  prompt: string,
+  options?: ClaudeAgentOptions
+): Promise<string> {
+  const timeout = options?.timeout ?? 300000; // 5 minutes default
+
   return new Promise((resolve, reject) => {
     // Use claude CLI with --print to get output without interactive mode
     const child = spawn("claude", ["--print", "-p", prompt], {
       stdio: ["pipe", "pipe", "pipe"],
-      timeout: 120000, // 2 minute timeout
     });
 
     let stdout = "";
     let stderr = "";
+    let timedOut = false;
+
+    // Manual timeout since spawn timeout doesn't always work
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      child.kill("SIGTERM");
+      reject(new Error(`Claude agent timed out after ${timeout / 1000}s`));
+    }, timeout);
 
     child.stdout?.on("data", (data) => {
       stdout += data.toString();
@@ -24,14 +40,18 @@ export async function spawnClaudeAgent(prompt: string): Promise<string> {
     });
 
     child.on("close", (code) => {
+      clearTimeout(timeoutId);
+      if (timedOut) return; // Already rejected
+
       if (code === 0) {
         resolve(stdout.trim());
       } else {
-        reject(new Error(`Claude agent failed with code ${code}: ${stderr}`));
+        reject(new Error(`Claude agent failed with code ${code}: ${stderr || "(no stderr)"}`));
       }
     });
 
     child.on("error", (error) => {
+      clearTimeout(timeoutId);
       reject(error);
     });
   });

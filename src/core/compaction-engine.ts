@@ -113,10 +113,12 @@ export class CompactionEngine {
     const prompt = SUMMARIZATION_PROMPT + conversation;
 
     try {
+      console.error("[CCKB] Calling Claude for summarization...");
       const result = await spawnClaudeAgent(prompt);
+      console.error("[CCKB] Claude summarization complete");
       return result;
     } catch (error) {
-      // Fallback to basic extraction if Claude SDK fails
+      console.error("[CCKB] Claude failed, using fallback:", error);
       return this.fallbackExtraction(conversation);
     }
   }

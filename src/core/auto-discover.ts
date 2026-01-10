@@ -1,7 +1,7 @@
 import { FileCollector, type CollectionResult } from "./file-collector.js";
 import { ChunkManager, type FileChunk } from "./chunk-manager.js";
 import { VaultIntegrator } from "./vault-integrator.js";
-import { spawnClaudeAgent, isClaudeAvailable } from "../utils/claude-sdk.js";
+import { spawnClaudeAgent, isClaudeAvailable, type ProgressEvent } from "../utils/claude-sdk.js";
 import { loadConfig } from "../utils/config.js";
 import type {
   Summary,
@@ -184,41 +184,41 @@ export class AutoDiscover {
       .replace("{projectType}", collection.projectType)
       .replace("{fileContents}", chunk.content);
 
-    const response = await this.runWithProgressIndicators(
-      () => spawnClaudeAgent(prompt, { timeout: 600000 }), // 10 minutes
-      [
-        { at: 60000, message: "      Still analyzing... (1 min)" },
-        { at: 180000, message: "      Still working... (3 min)" },
-        { at: 300000, message: "      Still working... (5 min)" },
-        { at: 480000, message: "      Almost timing out... (8 min)" },
-      ]
-    );
+    const response = await spawnClaudeAgent(prompt, {
+      timeout: 600000, // 10 minutes
+      onProgress: (event) => this.handleProgress(event, chunk),
+      onStderr: (data) => {
+        // Stream Claude's stderr in real-time for debugging
+        if (this.verbose) {
+          process.stderr.write(`      [Claude] ${data}`);
+        }
+      },
+    });
 
     return this.parseResponse(response, chunk);
   }
 
-  private async runWithProgressIndicators<T>(
-    task: () => Promise<T>,
-    indicators: { at: number; message: string }[]
-  ): Promise<T> {
-    const timers: NodeJS.Timeout[] = [];
+  private handleProgress(event: ProgressEvent, chunk: FileChunk): void {
+    const prefix = `      [${chunk.index + 1}/${chunk.totalChunks}]`;
+    const elapsed = event.elapsed ? `${(event.elapsed / 1000).toFixed(0)}s` : "";
 
-    // Set up progress indicators
-    for (const indicator of indicators) {
-      const timer = setTimeout(() => {
-        this.log(indicator.message);
-      }, indicator.at);
-      timers.push(timer);
-    }
-
-    try {
-      const result = await task();
-      return result;
-    } finally {
-      // Clean up timers
-      for (const timer of timers) {
-        clearTimeout(timer);
-      }
+    switch (event.type) {
+      case "started":
+        // Process started - initial log already done in discover loop
+        break;
+      case "heartbeat":
+        this.log(`${prefix} ${elapsed} - Still processing...`);
+        break;
+      case "stdout":
+        this.log(`${prefix} ${elapsed} - Receiving data (${event.bytesReceived} bytes)`);
+        break;
+      case "complete":
+        this.log(`${prefix} ${elapsed} - Analysis complete`);
+        break;
+      case "error":
+        this.log(`${prefix} ERROR: ${event.message}`);
+        break;
+      // stderr is handled by onStderr callback
     }
   }
 

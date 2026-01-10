@@ -8,4 +8,14 @@ export { IndexManager } from "./core/index-manager.js";
 export { AutoDiscover } from "./core/auto-discover.js";
 export { FileCollector } from "./core/file-collector.js";
 export { ChunkManager } from "./core/chunk-manager.js";
+export {
+  spawnClaudeAgent,
+  spawnClaudeAgentWithHandle,
+  isClaudeAvailable,
+} from "./utils/claude-sdk.js";
+export type {
+  ClaudeAgentOptions,
+  ClaudeAgentHandle,
+  ProgressEvent,
+} from "./utils/claude-sdk.js";
 export type { CCKBConfig } from "./utils/config.js";

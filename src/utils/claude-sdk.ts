@@ -56,10 +56,23 @@ export function spawnClaudeAgentWithHandle(
     }
   };
 
-  // Use claude CLI with --print to get output without interactive mode
-  const child = spawn("claude", ["--print", "-p", prompt], {
+  // Use claude CLI with --print flag, sending prompt via stdin
+  // Note: Passing prompt as argument doesn't work - Claude expects stdin input
+  const child = spawn("claude", ["--print"], {
     stdio: ["pipe", "pipe", "pipe"],
   });
+
+  // Send prompt via stdin (this is how Claude CLI expects input)
+  if (child.stdin) {
+    child.stdin.write(prompt);
+    child.stdin.end();
+  }
+
+  // Log the command being executed for debugging
+  const promptPreview = prompt.length > 200 ? prompt.substring(0, 200) + "..." : prompt;
+  console.error(`[Claude SDK] Spawning: claude --print (prompt via stdin)`);
+  console.error(`[Claude SDK] Prompt length: ${prompt.length} chars`);
+  console.error(`[Claude SDK] Prompt preview: ${promptPreview.replace(/\n/g, "\\n")}`);
 
   emit({ type: "started", message: `Claude process spawned (PID: ${child.pid})` });
 

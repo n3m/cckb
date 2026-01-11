@@ -1,3 +1,9 @@
+## ⚠️ WORK IN PROGRESS ⚠️
+
+**This project is under active development. Features may change, break, or be incomplete. We welcome contributions — feel free to open issues, submit pull requests, or share feedback!**
+
+---
+
 # CCKB - Claude Code Knowledge Base
 
 **Automatic project knowledge capture for Claude Code**
